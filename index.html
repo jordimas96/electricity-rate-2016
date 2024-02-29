@@ -1,0 +1,595 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tarifa Elèctrica</title>
+    <link rel="stylesheet" href="css/estil.css" type="text/css" media="screen" charset="utf-8">
+  </head>
+  <body>
+    <div id="quadreData" class="quadre">
+      <div id="hora"></div>
+      <hr style="margin:0">
+      <div id="data"></div>
+    </div>
+    <div id="preuActual" class="quadre"></div>
+    <div id="DIVmillorHora" class="quadre" class="divsDreta"></div>
+    <div id="DIVpitjorHora" class="quadre" class="divsDreta"></div>
+    <div id="bonaMalaHora" class="quadre" class="divsDreta"></div>
+    <div id="graficFons" class="grafics"></div>
+    <div id="graficAvui" class="grafics"></div>
+    <div id="graficAhir" class="grafics"></div>
+    <div id="graficSetPass" class="grafics"></div>
+    <div id="taula1" class="taula"></div>
+    <div id="taula2" class="taula"></div>
+    <div id="divsInfoGrafic"></div>
+
+    <table id="taulaOpcionsComparar">
+      <tr>
+        <td>
+          <input type="checkbox" class="checkBox" id="checkGraficAvui" onclick="comparaGrafics(1);" checked>
+        </td>
+        <td class="textCheckbox">
+          Gràfic avui
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type="checkbox" class="checkBox" id="checkGraficAhir" onclick="comparaGrafics(2);">
+        </td>
+        <td class="textCheckbox">
+          Gràfic ahir
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type="checkbox" class="checkBox" id="checkGraficSetPass" onclick="comparaGrafics(3);">
+        </td>
+        <td class="textCheckbox">
+          Gràfic setmana passada
+        </td>
+      </tr>
+    </table>
+
+
+    <script src="js/jquery-2.2.1.js" type="text/javascript"></script>
+    <script>
+      // Data d'avui //
+      var d=new Date();
+      // Data d'ahir //
+      var dAhir=new Date();
+      dAhir.setDate(dAhir.getDate()-1)
+      // Data setmana passada //
+      var dSetPass=new Date();
+      dSetPass.setDate(dSetPass.getDate()-7)
+
+      var link1;
+      var link2;
+      var link3;
+      var a;
+      var aAhir;
+      var aSetPass;
+      var opacitat;
+      var graficsVisibles = 1;
+      var preuMax = 130;
+      var preuMin = 60;
+
+      // Saber quin navegador tenim //
+      var prefixNavegador="";
+      if (window.chrome && window.chrome.webstore)
+        prefixNavegador="-webkit-";
+      else
+        prefixNavegador="-moz-";
+
+      // link1="api/tarifa.php?dia="+d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+      // link2="api/tarifa.php?dia="+dAhir.getFullYear()+"-"+(dAhir.getMonth()+1)+"-"+dAhir.getDate();
+      // link3="api/tarifa.php?dia="+dSetPass.getFullYear()+"-"+(dSetPass.getMonth()+1)+"-"+dSetPass.getDate();
+      link1="api/2016-02-29.json";
+      link2="api/2016-02-28.json";
+      link3="api/2016-02-22.json";
+
+      // Petició avui //
+      peticioAJAX=$.get(link1, function(data) {
+        // a=JSON.parse(data);
+        a=data;
+      });
+
+      // Petició ahir //
+      peticioAJAXahir=$.get(link2, function(data) {
+        // aAhir=JSON.parse(data);
+        aAhir=data;
+      });
+
+      // Petició setmana passada //
+      peticioAJAXsetPass=$.get(link3, function(data) {
+        // aSetPass=JSON.parse(data);
+        aSetPass=data;
+      });
+
+      // Missatge error quan la petició falli //
+      var missError = "La petició ajax ha fallat";
+
+      peticioAJAX
+        .fail(function() { alert(missError+" (Avui)"); })
+      // quan la petició ajax hagi funcionat //
+      peticioAJAX.success(function() {
+        actualitzaHora();
+        mpHora();
+        preuActual();
+        posaTotGrafic();
+        FUNCbonaMalaHora();
+        posaTaula();
+        posaDadesMitjana();
+      });
+      peticioAJAXahir
+        .fail(function() { alert(missError+" (Ahir)") })
+        .success(function() {
+          posaGrafic("Ahir",aAhir);
+          posaLiniaMitjana("Ahir");
+          $("#graficAhir").hide();
+        })
+      peticioAJAXsetPass
+        .fail(function() { alert(missError+" (Setmana passada)") })
+        .success(function() {
+          posaGrafic("SetPass",aSetPass);
+          posaLiniaMitjana("SetPass");
+          $("#graficSetPass").hide();
+        })
+//>>>
+
+
+function comparaGrafics(mode)
+{
+  if (mode == 1)
+  { // Avui //
+    if ($("#checkGraficAvui").is(":checked"))
+    {
+      $("#graficAvui").show("fast");
+      graficsVisibles++;
+    }
+    else {
+      $("#graficAvui").hide("fast");
+      graficsVisibles--;
+    }
+  }
+  else if (mode == 2)
+  { // Ahir //
+    if ($("#checkGraficAhir").is(":checked"))
+    {
+      $("#graficAhir").show("fast");
+      graficsVisibles++;
+    }
+    else {
+      $("#graficAhir").hide("fast");
+      graficsVisibles--;
+    }
+  }
+  else
+  { // Setmana passada //
+    if ($("#checkGraficSetPass").is(":checked"))
+    {
+      $("#graficSetPass").show("fast");
+      graficsVisibles++;
+    }
+    else {
+      $("#graficSetPass").hide("fast");
+      graficsVisibles--;
+    }
+  }
+  if (graficsVisibles == 0) opacitat = 0;
+  else if (graficsVisibles == 1) opacitat = 1;
+  else if (graficsVisibles == 2) opacitat = 0.5;
+  else if (graficsVisibles == 3) opacitat = 0.33;
+  // Totes les barres dels tres grafics //
+  if (opacitat != 0)
+  {
+    $(".barresGrafic").css("opacity",opacitat)
+    $(".barresGrafic").show()
+  }
+  else
+    $(".barresGrafic").hide("fast")
+}
+      function posaDadesMitjana()
+      {
+        $("#dadesMitjana").remove();
+        var dadesMitjana = $("<div>");
+
+        $(dadesMitjana)
+          .attr("id","dadesMitjana")
+          .addClass("quadre")
+          .hide()
+          .css({"left":100,"top":100,"background-color":calcularColor(mitjana(preusPercent))})
+
+        $("body").append(dadesMitjana);
+      }
+      function mitjanaValorsJson(json)
+      {
+        var suma=0;
+        for (var i=0;i<json.indicator.values.length;i++)
+        {
+          suma += json.indicator.values[i].value;
+        }
+        return suma/json.indicator.values.length;
+      }
+      function calculaCanvi(v1,v2)
+      {
+        var res=(((v2*100.0)/v1)-100).toFixed(3);
+
+        if (res > 0)
+          res = "↑ " + "+"+res;
+        else if (res < 0)
+          res = "↓ " + res;
+        else
+          res = "=" + "&nbsp;&nbsp;"+res;
+        return res + "%";
+      }
+
+      function posaTaula()
+      {
+        for (var i=0;i<24;i++)
+        {
+          var div=$("<div>");
+          $(div)
+            .addClass("dadaTaula")
+            .data({"color":calcularColor(preusPercent[i])})
+            .css({"height":100/12+"%","background-color":$(div).data("color"),"cursor":"default"})
+            .hover(
+              function () {
+                $(this).css({"background-color":"#8ff","transition":"0.25s"})
+              },
+              function () {
+                $(this).css({"background-color":$(this).data("color"),"transition":"0.25s"})
+              }
+            )
+
+          if (i<12)
+            $("#taula1").append(div);
+          else
+            $("#taula2").append(div);
+
+          // divs de dins de cada barra horitzontal //
+          // Div 1 //
+          var div1 = $("<div>");
+          $(div1)
+            .addClass("dadaTaulaDiv1")
+            .addClass("centratVerticalment")
+            .html(format00(i)+"h")
+
+          // Div 2//
+          var div2 = $("<div>");
+          $(div2)
+            .addClass("dadaTaulaDiv2")
+            .attr("id","divPujadaPercent"+format00(i+1))
+            .addClass("centratVerticalment")
+
+          var percent;
+          if (i==0)
+          {
+            peticioAJAXahir.success(function () {
+              $("#divPujadaPercent01").html(calculaCanvi(
+                aAhir.indicator.values[23].value,
+                a.indicator.values[0].value))
+            })
+            percent="";
+          }
+          else
+            percent = calculaCanvi(a.indicator.values[i-1].value,a.indicator.values[i].value);
+
+          $(div2).html(percent)
+
+          // Div 3 //
+          var div3 = $("<div>");
+          $(div3)
+            .addClass("dadaTaulaDiv3")
+            .addClass("centratVerticalment")
+            .html((a.indicator.values[i].value/1000.0).toFixed(5)+" €/kWh")
+
+
+          $(div).append(div1,div2,div3);
+        }
+      }
+      function FUNCbonaMalaHora()
+      {
+        bonaHora=false;
+        if (d.getHours()<23)
+        {
+          bonaHora = a.indicator.values[d.getHours()].value < a.indicator.values[d.getHours()+1].value;
+        }
+        else
+        {
+          dDema=new Date();
+          dDema.setDate(dDema.getDate()+1)
+
+          // var link="api/tarifa.php?dia="+dDema.getFullYear()+"-"+dDema.getMonth()+1+"-"+dDema.getDate();
+          var link="api/2016-03-01.json";
+
+          peticioAJAXdema=$.get(link, function(data) {
+            // aDema=JSON.parse(data);
+            aDema=data;
+          });
+
+          peticioAJAXdema
+            .fail(function() { alert(missError+" (dema)"); })
+
+          peticioAJAXdema.success(function () {
+              bonaHora = a.indicator.values[23].value < aDema.indicator.values[0].value;
+            posaMissatgeBonaOMalaHora(bonaHora);
+          })
+        }
+        posaMissatgeBonaOMalaHora(bonaHora);
+      }
+      function posaMissatgeBonaOMalaHora(bonaHora)
+      {
+        var miss;
+        if (bonaHora)
+        {
+          if (60-d.getMinutes() == 1)
+            miss="<b>Ara es un bon moment,<br>gasta abans d'un minut.</b>";
+          else
+            miss="<b>Ara es un bon moment,<br>gasta abans de "+(60-d.getMinutes())+" minuts.</b>";
+
+          $("#bonaMalaHora")
+            .html(miss)
+            .css({"color":"#0d0"})
+        }
+        else
+        {
+          if (60-d.getMinutes() == 1)
+            miss="<b>Ara es un mal moment,<br>espera un minut per a<br>tenir una tarifa millor.</b>";
+          else
+            miss="<b>Ara es un mal moment,<br>espera "+(60-d.getMinutes())+" minuts per a<br>tenir una tarifa millor.</b>";
+          $("#bonaMalaHora")
+            .html(miss)
+            .css({"color":"#f00"})
+        }
+      }
+      function posaGrafic(dia,aJson)
+      {
+
+        var nomGrafic="#grafic"+dia;
+        // Buidem el gràfic, per evitar que a les 0h es dibuixi l'altre a sobre //
+        $(nomGrafic).empty();
+        preusPercent = new Array();
+
+        // BARRES //
+        // TODO: AVÍS: AVIS: PENDENT: això fa que cada dia tingui la seva propia escala, problema al comparar-la amb altres dies !!!!
+        for (var i=0;i<24;i++)
+        {
+          // Amb aixo aconseguim l'altura de cada div en % //
+          preusPercent[i]=(aJson.indicator.values[i].value-preuMin)*(100/(preuMax-preuMin));
+          altura=preusPercent[i];
+
+          var div=$("<div>");
+          $(div).attr("id","col"+format00(i+1)+dia)
+            .addClass("barresGrafic")
+            .css({"width":100/24-0.05+"%","height":altura+"%","position":"absolute","bottom":"0px","left":i*(100/24.0)+"%",
+            "background":calcularColorGradient(altura)})
+            .hover(
+              function () {
+                $("#dades"+(this.id).substring(3,5)+dia).show("fast");
+              },
+              function () {
+                $("#dades"+(this.id).substring(3,5)+dia).hide("fast");
+              })
+            .mousemove(function ( event ) {
+              $("#dades"+(this.id).substring(3,5)+dia).css({"left":event.pageX+10,"top":event.pageY+10})
+            })
+          $(nomGrafic).append(div);
+
+          // Dades barra //
+          var divDades=$("<div>");
+
+          $(divDades)
+            .addClass("quadre")
+            .addClass("dadesGrafic")
+            .attr("id","dades"+format00(i+1)+dia)
+            .css({"position":"absolute","width":"60px","left":i*(100/24.0)+"%","top":"103%",
+              "background":calcularColorGradient(altura),"border":0,"position":"absolute","text-align":"center",
+              "padding":"5 0 5 0"})
+            .html("<b>"+format00(i)+"h</b> <h6 class='divSotaBarres'>"+aJson.indicator.values[i].value+"<br>€/MWh</h6>")
+            .hide()
+
+          $("#divsInfoGrafic").append(divDades);
+        }
+      }
+      function posaTotGrafic()
+      {
+        // GRAFIC //
+        posaGrafic("Avui",a);
+
+        // MITJANA //
+        posaLiniaMitjana("Avui");
+
+        // LINIA VERTICAL HORA DEL DIA //
+        posaLiniaHoraGrafic();
+      }
+      function posaLiniaHoraGrafic()
+      {
+        // Linia //
+        $("#liniaHora").remove();
+        var liniaHora=$("<div>");
+
+        $(liniaHora)
+          .attr("id","liniaHora")
+          .css({"left":calcularLeftHora()+"%"})
+          .hover(
+            function () {
+              $(this).css({"background-color":"red","transition":"0.25s"})
+              $(this).children().first().css({"border-left-color":"red","transition":"0.25s"})
+
+              $("#horaCursor").show("fast")
+              $(this).mousemove(function ( event ) {
+                $("#horaCursor").css({"left":event.pageX+10,"top":event.pageY+10})
+              })
+            },
+            function () {
+              $(this).css({"background-color":"#ddd","transition":"0.25s"})
+              $(this).children().first().css({"border-left-color":"#ddd","transition":"0.25s"})
+              $("#horaCursor").hide("fast")
+            })
+
+        // Triangle //
+        $("#triangle").remove();
+        var triangle = $("<div>");
+
+        $(triangle)
+          .attr("id","triangle")
+
+        $("#graficAvui").append(liniaHora);
+        $("#liniaHora").append(triangle);
+
+        // Quadre Hora //
+        posaQuadreHora();
+      }
+      function posaQuadreHora()
+      {
+        $("#horaCursor").remove();
+        var horaCursor = $("<div>");
+
+        $(horaCursor)
+          .attr("id","horaCursor")
+          .addClass("quadre")
+          .html("<b>"+format00(d.getHours())+":"+format00(d.getMinutes())+"</b>")
+          .hide()
+          .css({"left":100,"top":100})
+
+        $("body").append(horaCursor);
+      }
+      function calcularLeftHora()
+      {
+        // 0 ~ 100 //
+        return (d.getHours()*60+d.getMinutes())/(60*24)*100;
+      }
+      function posaLiniaMitjana(dia)
+      {
+        var liniaMitjana=$("<div>")
+
+        $(liniaMitjana)
+          .attr("id","liniaMitjana"+dia)
+          .addClass("liniaMitjana")
+          .css({"bottom":mitjana(preusPercent)+"%","background-color":calcularColor(mitjana(preusPercent))})
+          .hover(
+            function () {
+              $("#dadesMitjana").show("fast")
+              $(this).mousemove(function ( event ) {
+                var jsonUtilitzat;
+                if (dia == "Avui") jsonUtilitzat = a;
+                else if (dia == "Ahir") jsonUtilitzat = aAhir;
+                else jsonUtilitzat = aSetPass;
+                $("#dadesMitjana")
+                  .css({"left":event.pageX+10,"top":event.pageY+10})
+                  .html("<b>"+(mitjanaValorsJson(jsonUtilitzat)/1000.0).toFixed(5)+"<br> kWh</b>")
+              })
+            },
+            function () {
+              $("#dadesMitjana").hide("fast")
+            })
+
+        $("#grafic"+dia).append(liniaMitjana);
+      }
+      function mitjana(valors)
+      {
+        var suma=0;
+
+        for (var i=0;i<valors.length;i++)
+          suma+=valors[i];
+
+        return suma/valors.length;
+      }
+      function calcularColor(percent)
+      {
+        percent=percent*2.55;
+
+        modul=percent%128;
+        if (percent>128)
+        {
+          var R=255;
+          var G=Math.round(255-modul*2);
+          var B=0;
+        }
+        else
+        {
+          var R=Math.round(modul*2);
+          var G=255;
+          var B=0;
+        }
+
+        /*
+        var R=Math.round(percent);
+        var G=Math.round(255-percent);
+        var B=Math.round(255-percent);
+        //var B=0;// verd //*/
+
+        return "rgb("+R+","+G+","+B+")";
+      }
+      function calcularColorGradient(altura)
+      { return "linear-gradient(to right, rgb(255,255,255) -170%,"+calcularColor(altura)+" 100%)" }
+
+      function mpHora()
+      {
+        millorPreu=300;
+        pitjorPreu=0;
+        millorHor=0;
+        pitjorHor=0;
+        for (var i=0;i<24;i++)
+        {
+          if (a.indicator.values[i].value < millorPreu)
+          {
+            millorPreu=a.indicator.values[i].value;
+            millorHor=i;
+          }
+          else if (a.indicator.values[i].value > pitjorPreu)
+          {
+            pitjorPreu=a.indicator.values[i].value;
+            pitjorHor=i;
+          }
+        }
+        $("#DIVmillorHora").html("Millor hora d'avui: "+format00(millorHor)+":00");
+        $("#DIVpitjorHora").html("Pitjor hora d'avui: "+format00(pitjorHor)+":00");
+      }
+      function preuActual()
+      {
+        $("#preuActual").html("<b>PREU ACTUAL:</b><br>"+(a.indicator.values[d.getHours()].value/1000.0).toFixed(5)+" €/kWh");
+      }
+      function posaHora()
+      {
+        var diesSet=["Diumenge","Dilluns","Dimarts","Dimecres","Dijous","Divendres","Dissabte"];
+        var mesos=["de Gener","de Febrer","de Març","d'Abril","de Maig","de Juny","de Juliol","d'Agost","de Setembre","d'Octubre","de Novembre","de Desembre"];
+
+        $("#hora").html(format00(d.getHours())+":"+format00(d.getMinutes()))
+        $("#data").html("<b>"+diesSet[d.getDay()]+", "+d.getDate()+" "+mesos[d.getMonth()]+" de "+d.getFullYear()+"</b>");
+      }
+      function actualitzaHora()
+      {
+        // s'actualitza cada minut //
+        d=new Date();
+
+        posaHora();
+        posaLiniaHoraGrafic();
+        FUNCbonaMalaHora();
+        posaQuadreHora();
+        //...
+        if (d.getMinutes() == 0)
+        {
+          // s'actualitza cada hora  //
+          preuActual();
+          //...
+
+          if (d.getHours() == 0)
+          {
+            // s'actualitza cada dia //
+            loaction.reload();
+          }
+        }
+
+        // s'actualitzarà la hora quan acabi el minut //
+        setTimeout("actualitzaHora()",60000-(d.getSeconds()*1000+d.getMilliseconds()));
+      }
+      function format00(hora)
+      {
+        hora=parseInt(hora);
+        if (hora<10)
+          hora="0"+hora;
+        return hora;
+      }
+    </script>
+  </body>
+</html>
