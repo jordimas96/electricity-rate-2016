@@ -143,11 +143,11 @@ function comparaGrafics(mode)
   { // Avui //
     if ($("#checkGraficAvui").is(":checked"))
     {
-      $("#graficAvui").show("fast");
+      $("#graficAvui").show();
       graficsVisibles++;
     }
     else {
-      $("#graficAvui").hide("fast");
+      $("#graficAvui").hide();
       graficsVisibles--;
     }
   }
@@ -155,11 +155,11 @@ function comparaGrafics(mode)
   { // Ahir //
     if ($("#checkGraficAhir").is(":checked"))
     {
-      $("#graficAhir").show("fast");
+      $("#graficAhir").show();
       graficsVisibles++;
     }
     else {
-      $("#graficAhir").hide("fast");
+      $("#graficAhir").hide();
       graficsVisibles--;
     }
   }
@@ -167,11 +167,11 @@ function comparaGrafics(mode)
   { // Setmana passada //
     if ($("#checkGraficSetPass").is(":checked"))
     {
-      $("#graficSetPass").show("fast");
+      $("#graficSetPass").show();
       graficsVisibles++;
     }
     else {
-      $("#graficSetPass").hide("fast");
+      $("#graficSetPass").hide();
       graficsVisibles--;
     }
   }
@@ -186,7 +186,7 @@ function comparaGrafics(mode)
     $(".barresGrafic").show()
   }
   else
-    $(".barresGrafic").hide("fast")
+    $(".barresGrafic").hide()
 }
       function posaDadesMitjana()
       {
@@ -234,10 +234,10 @@ function comparaGrafics(mode)
             .css({"height":100/12+"%","background-color":$(div).data("color"),"cursor":"default"})
             .hover(
               function () {
-                $(this).css({"background-color":"#8ff","transition":"0.25s"})
+                $(this).css({"background-color":"#8ff"})
               },
               function () {
-                $(this).css({"background-color":$(this).data("color"),"transition":"0.25s"})
+                $(this).css({"background-color":$(this).data("color")})
               }
             )
 
@@ -365,10 +365,10 @@ function comparaGrafics(mode)
             "background":calcularColorGradient(altura)})
             .hover(
               function () {
-                $("#dades"+(this.id).substring(3,5)+dia).show("fast");
+                $("#dades"+(this.id).substring(3,5)+dia).show();
               },
               function () {
-                $("#dades"+(this.id).substring(3,5)+dia).hide("fast");
+                $("#dades"+(this.id).substring(3,5)+dia).hide();
               })
             .mousemove(function ( event ) {
               $("#dades"+(this.id).substring(3,5)+dia).css({"left":event.pageX+10,"top":event.pageY+10})
@@ -416,7 +416,7 @@ function comparaGrafics(mode)
               $(this).css({"background-color":"red","transition":"0.25s"})
               $(this).children().first().css({"border-left-color":"red","transition":"0.25s"})
 
-              $("#horaCursor").show("fast")
+              $("#horaCursor").show()
               $(this).mousemove(function ( event ) {
                 $("#horaCursor").css({"left":event.pageX+10,"top":event.pageY+10})
               })
@@ -424,7 +424,7 @@ function comparaGrafics(mode)
             function () {
               $(this).css({"background-color":"#ddd","transition":"0.25s"})
               $(this).children().first().css({"border-left-color":"#ddd","transition":"0.25s"})
-              $("#horaCursor").hide("fast")
+              $("#horaCursor").hide()
             })
 
         // Triangle //
@@ -469,7 +469,7 @@ function comparaGrafics(mode)
           .css({"bottom":mitjana(preusPercent)+"%","background-color":calcularColor(mitjana(preusPercent))})
           .hover(
             function () {
-              $("#dadesMitjana").show("fast")
+              $("#dadesMitjana").show()
               $(this).mousemove(function ( event ) {
                 var jsonUtilitzat;
                 if (dia == "Avui") jsonUtilitzat = a;
@@ -481,7 +481,7 @@ function comparaGrafics(mode)
               })
             },
             function () {
-              $("#dadesMitjana").hide("fast")
+              $("#dadesMitjana").hide()
             })
 
         $("#grafic"+dia).append(liniaMitjana);

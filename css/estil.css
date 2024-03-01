@@ -23,6 +23,7 @@ body {
 }
 .quadre hr {
   border: 1px solid #4cc;
+  border-bottom: 0;
 }
 #hora, #data {
   text-align: center;
