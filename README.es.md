@@ -1,0 +1,3 @@
+# electricity-rate-2016
+[//]: # (Description)
+Creada en 2016 durante mis estudios de programación web, esta web muestra un gráfico que representa los precios horarios de la electricidad y su comparación con días anteriores. La web consulta una API para obtener resultados en tiempo real y tiene un sistema de almacenamiento en caché para evitar consultas innecesarias. La web puede adaptarse perfectamente a cada tamaño de pantalla, incluso más allá de los estándares habituales. El proyecto permanece intacto desde que lo hice durante mis estudios de DAW.
