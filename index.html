@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Tarifa Elèctrica</title>
+    <title>Electricity Rate</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/estil.css" type="text/css" media="screen" charset="utf-8">
@@ -29,7 +29,7 @@
           <input type="checkbox" class="checkBox" id="checkGraficAvui" onclick="comparaGrafics(1);" checked>
         </td>
         <td class="textCheckbox">
-          Gràfic avui
+          Today's chart
         </td>
       </tr>
       <tr>
@@ -37,7 +37,7 @@
           <input type="checkbox" class="checkBox" id="checkGraficAhir" onclick="comparaGrafics(2);">
         </td>
         <td class="textCheckbox">
-          Gràfic ahir
+          Yesterday's chart
         </td>
       </tr>
       <tr>
@@ -45,7 +45,7 @@
           <input type="checkbox" class="checkBox" id="checkGraficSetPass" onclick="comparaGrafics(3);">
         </td>
         <td class="textCheckbox">
-          Gràfic setmana passada
+          Last week's chart
         </td>
       </tr>
     </table>
@@ -106,10 +106,10 @@
       });
 
       // Missatge error quan la petició falli //
-      var missError = "La petició ajax ha fallat";
+      var missError = "The ajax request failed";
 
       peticioAJAX
-        .fail(function() { alert(missError+" (Avui)"); })
+        .fail(function() { alert(missError+" (Today)"); })
       // quan la petició ajax hagi funcionat //
       peticioAJAX.success(function() {
         actualitzaHora();
@@ -121,14 +121,14 @@
         posaDadesMitjana();
       });
       peticioAJAXahir
-        .fail(function() { alert(missError+" (Ahir)") })
+        .fail(function() { alert(missError+" (Yesterday)") })
         .success(function() {
           posaGrafic("Ahir",aAhir);
           posaLiniaMitjana("Ahir");
           $("#graficAhir").hide();
         })
       peticioAJAXsetPass
-        .fail(function() { alert(missError+" (Setmana passada)") })
+        .fail(function() { alert(missError+" (Last week)") })
         .success(function() {
           posaGrafic("SetPass",aSetPass);
           posaLiniaMitjana("SetPass");
@@ -308,7 +308,7 @@ function comparaGrafics(mode)
           });
 
           peticioAJAXdema
-            .fail(function() { alert(missError+" (dema)"); })
+            .fail(function() { alert(missError+" (tomorrow)"); })
 
           peticioAJAXdema.success(function () {
               bonaHora = a.indicator.values[23].value < aDema.indicator.values[0].value;
@@ -323,9 +323,9 @@ function comparaGrafics(mode)
         if (bonaHora)
         {
           if (60-d.getMinutes() == 1)
-            miss="<b>Ara es un bon moment,<br>gasta abans d'un minut.</b>";
+            miss="<b>Now is a good time,<br>spend before a minute.</b>";
           else
-            miss="<b>Ara es un bon moment,<br>gasta abans de "+(60-d.getMinutes())+" minuts.</b>";
+            miss="<b>Now is a good time,<br>spend before "+(60-d.getMinutes())+" minutes.</b>";
 
           $("#bonaMalaHora")
             .html(miss)
@@ -334,9 +334,9 @@ function comparaGrafics(mode)
         else
         {
           if (60-d.getMinutes() == 1)
-            miss="<b>Ara es un mal moment,<br>espera un minut per a<br>tenir una tarifa millor.</b>";
+            miss="<b>Now is a bad time,<br>wait a minute to<br>have a better rate.</b>";
           else
-            miss="<b>Ara es un mal moment,<br>espera "+(60-d.getMinutes())+" minuts per a<br>tenir una tarifa millor.</b>";
+            miss="<b>Now is a bad time,<br>wait "+(60-d.getMinutes())+" minutes to<br>have a better rate.</b>";
           $("#bonaMalaHora")
             .html(miss)
             .css({"color":"#f00"})
@@ -543,20 +543,20 @@ function comparaGrafics(mode)
             pitjorHor=i;
           }
         }
-        $("#DIVmillorHora").html("Millor hora d'avui: "+format00(millorHor)+":00");
-        $("#DIVpitjorHora").html("Pitjor hora d'avui: "+format00(pitjorHor)+":00");
+        $("#DIVmillorHora").html("Best time today: "+format00(millorHor)+":00");
+        $("#DIVpitjorHora").html("Worst time today: "+format00(pitjorHor)+":00");
       }
       function preuActual()
       {
-        $("#preuActual").html("<b>PREU ACTUAL:</b><br>"+(a.indicator.values[d.getHours()].value/1000.0).toFixed(5)+" €/kWh");
+        $("#preuActual").html("<b>CURRENT PRICE:</b><br>"+(a.indicator.values[d.getHours()].value/1000.0).toFixed(5)+" €/kWh");
       }
       function posaHora()
       {
-        var diesSet=["Diumenge","Dilluns","Dimarts","Dimecres","Dijous","Divendres","Dissabte"];
-        var mesos=["de Gener","de Febrer","de Març","d'Abril","de Maig","de Juny","de Juliol","d'Agost","de Setembre","d'Octubre","de Novembre","de Desembre"];
+        var diesSet=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        var mesos=["January","February","March","April","May","June","July","August","September","d 'October","November","December"];
 
         $("#hora").html(format00(d.getHours())+":"+format00(d.getMinutes()))
-        $("#data").html("<b>"+diesSet[d.getDay()]+", "+d.getDate()+" "+mesos[d.getMonth()]+" de "+d.getFullYear()+"</b>");
+        $("#data").html("<b>"+diesSet[d.getDay()]+", "+d.getDate()+" "+mesos[d.getMonth()]+" of "+d.getFullYear()+"</b>");
       }
       function actualitzaHora()
       {
@@ -594,3 +594,5 @@ function comparaGrafics(mode)
     </script>
   </body>
 </html>
+
+<!-- Jordi Mas Parramon - xordimas@gmail.com - https://github.com/jordimas96 -->
